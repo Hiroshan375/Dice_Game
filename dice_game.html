@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Rolling Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .players {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+        }
+        
+        .player {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            min-width: 200px;
+        }
+        
+        .player h3 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        
+        .dice {
+            width: 80px;
+            height: 80px;
+            background: white;
+            color: #333;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .dice.rolling {
+            animation: roll 0.5s ease-in-out;
+        }
+        
+        @keyframes roll {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg); }
+            50% { transform: rotate(180deg); }
+            75% { transform: rotate(270deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .roll-button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 25px;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .roll-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .roll-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .winner {
+            color: #4ecdc4;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            font-size: 1.1em;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .player-name-input {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            width: 180px;
+        }
+        
+        .game-mode {
+            text-align: center;
+            margin: 20px 0 30px 0;
+            font-size: 1.1em;
+        }
+        
+        .game-mode select {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-left: 10px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        
+        .game-mode select option {
+            background: #333;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎲 Dice Rolling Game 🎲</h1>
+        
+        <div class="game-mode">
+            <label>Game Mode:</label>
+            <select id="gameMode" onchange="switchGameMode()">
+                <option value="human-computer">Human vs Computer</option>
+                <option value="human-human">Human vs Human</option>
+            </select>
+        </div>
+        
+        <div class="players">
+            <div class="player">
+                <h3 id="player1Title">Player 1</h3>
+                <input type="text" class="player-name-input" id="player1Name" placeholder="Enter Player 1 name" value="Hiroshan">
+                <div class="dice" id="player1Dice">?</div>
+                <div id="player1Roll">Ready to roll!</div>
+            </div>
+            
+            <div class="player">
+                <h3 id="player2Title">Player 2</h3>
+                <input type="text" class="player-name-input" id="player2Name" placeholder="Enter Player 2 name" value="Computer" disabled>
+                <div class="dice" id="player2Dice">?</div>
+                <div id="player2Roll">Ready to roll!</div>
+            </div>
+        </div>
+        
+        <button class="roll-button" onclick="playGame()">Roll Dice!</button>
+        
+        <div class="result" id="result">Click "Roll Dice!" to start the game</div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div id="player1WinsLabel">Player 1 Wins</div>
+                <div id="player1Wins">0</div>
+            </div>
+            <div class="stat">
+                <div id="player2WinsLabel">Player 2 Wins</div>
+                <div id="player2Wins">0</div>
+            </div>
+            <div class="stat">
+                <div>Ties</div>
+                <div id="ties">0</div>
+            </div>
+            <div class="stat">
+                <div>Games Played</div>
+                <div id="gamesPlayed">0</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game statistics
+        let stats = {
+            player1Wins: 0,
+            player2Wins: 0,
+            ties: 0,
+            gamesPlayed: 0
+        };
+
+        let gameMode = 'human-computer'; // default mode
+
+        // Dice class equivalent
+        class Dice {
+            roll() {
+                return Math.floor(Math.random() * 6) + 1;
+            }
+        }
+
+        // Player class equivalent
+        class Player {
+            constructor(name) {
+                this.name = name;
+            }
+            
+            getName() {
+                return this.name;
+            }
+            
+            setName(name) {
+                this.name = name;
+            }
+            
+            rollDice(dice) {
+                return dice.roll();
+            }
+        }
+
+        // HumanPlayer class equivalent
+        class HumanPlayer extends Player {
+            constructor(name) {
+                super(name);
+            }
+        }
+
+        // ComputerPlayer class equivalent
+        class ComputerPlayer extends Player {
+            constructor() {
+                super("Computer");
+            }
+        }
+
+        // Game class equivalent
+        class Game {
+            play(player1, player2) {
+                const dice = new Dice();
+                const roll1 = player1.rollDice(dice);
+                const roll2 = player2.rollDice(dice);
+                
+                return {
+                    player1Roll: roll1,
+                    player2Roll: roll2,
+                    player1Name: player1.getName(),
+                    player2Name: player2.getName()
+                };
+            }
+        }
+
+        function switchGameMode() {
+            gameMode = document.getElementById('gameMode').value;
+            const player2Input = document.getElementById('player2Name');
+            const player1Title = document.getElementById('player1Title');
+            const player2Title = document.getElementById('player2Title');
+            const player1WinsLabel = document.getElementById('player1WinsLabel');
+            const player2WinsLabel = document.getElementById('player2WinsLabel');
+            
+            if (gameMode === 'human-human') {
+                player2Input.disabled = false;
+                player2Input.value = 'Player 2';
+                player2Input.placeholder = 'Enter Player 2 name';
+                player1Title.textContent = 'Player 1';
+                player2Title.textContent = 'Player 2';
+                player1WinsLabel.textContent = 'Player 1 Wins';
+                player2WinsLabel.textContent = 'Player 2 Wins';
+            } else {
+                player2Input.disabled = true;
+                player2Input.value = 'Computer';
+                player2Input.placeholder = 'Computer';
+                player1Title.textContent = 'Human Player';
+                player2Title.textContent = 'Computer';
+                player1WinsLabel.textContent = 'Human Wins';
+                player2WinsLabel.textContent = 'Computer Wins';
+            }
+            
+            // Reset stats when switching modes
+            stats = {
+                player1Wins: 0,
+                player2Wins: 0,
+                ties: 0,
+                gamesPlayed: 0
+            };
+            updateStats();
+            
+            // Reset dice and result
+            document.getElementById('player1Dice').textContent = '?';
+            document.getElementById('player2Dice').textContent = '?';
+            document.getElementById('player1Roll').textContent = 'Ready to roll!';
+            document.getElementById('player2Roll').textContent = 'Ready to roll!';
+            document.getElementById('result').textContent = 'Click "Roll Dice!" to start the game';
+            document.getElementById('result').className = 'result';
+        }
+
+        function updateStats() {
+            document.getElementById('player1Wins').textContent = stats.player1Wins;
+            document.getElementById('player2Wins').textContent = stats.player2Wins;
+            document.getElementById('ties').textContent = stats.ties;
+            document.getElementById('gamesPlayed').textContent = stats.gamesPlayed;
+        }
+
+        function animateDice() {
+            const player1Dice = document.getElementById('player1Dice');
+            const player2Dice = document.getElementById('player2Dice');
+            
+            player1Dice.classList.add('rolling');
+            player2Dice.classList.add('rolling');
+            
+            setTimeout(() => {
+                player1Dice.classList.remove('rolling');
+                player2Dice.classList.remove('rolling');
+            }, 500);
+        }
+
+        function playGame() {
+            const rollButton = document.querySelector('.roll-button');
+            rollButton.disabled = true;
+            
+            animateDice();
+            
+            setTimeout(() => {
+                // Get player names
+                const player1Name = document.getElementById('player1Name').value || 'Player 1';
+                const player2Name = document.getElementById('player2Name').value || 'Player 2';
+                
+                // Create players based on game mode
+                let player1, player2;
+                
+                if (gameMode === 'human-human') {
+                    player1 = new HumanPlayer(player1Name);
+                    player2 = new HumanPlayer(player2Name);
+                } else {
+                    player1 = new HumanPlayer(player1Name);
+                    player2 = new ComputerPlayer();
+                }
+                
+                // Create and play game
+                const game = new Game();
+                const result = game.play(player1, player2);
+                
+                // Update dice displays
+                document.getElementById('player1Dice').textContent = result.player1Roll;
+                document.getElementById('player2Dice').textContent = result.player2Roll;
+                document.getElementById('player1Roll').textContent = `Rolled: ${result.player1Roll}`;
+                document.getElementById('player2Roll').textContent = `Rolled: ${result.player2Roll}`;
+                
+                // Determine and display winner
+                let resultText = '';
+                let resultClass = '';
+                
+                if (result.player1Roll > result.player2Roll) {
+                    resultText = `🎉 ${result.player1Name} wins! (${result.player1Roll} vs ${result.player2Roll})`;
+                    resultClass = 'winner';
+                    stats.player1Wins++;
+                } else if (result.player1Roll < result.player2Roll) {
+                    resultText = `🎉 ${result.player2Name} wins! (${result.player2Roll} vs ${result.player1Roll})`;
+                    resultClass = 'winner';
+                    stats.player2Wins++;
+                } else {
+                    resultText = `🤝 It's a tie! Both rolled ${result.player1Roll}`;
+                    resultClass = 'winner';
+                    stats.ties++;
+                }
+                
+                stats.gamesPlayed++;
+                
+                const resultDiv = document.getElementById('result');
+                resultDiv.textContent = resultText;
+                resultDiv.className = `result ${resultClass}`;
+                
+                updateStats();
+                rollButton.disabled = false;
+            }, 500);
+        }
+
+        // Initialize stats display
+        updateStats();
+    </script>
+</body>
+</html>
